@@ -171,8 +171,10 @@ for code in sorted(per_sto):
         'pelanggan': pelanggan_total.get(code, 0),
     })
 
-# Alokasi kumulatif pelanggan per ODC (kumulatif berjalan; ODC terakhir
-# menampung sisa sehingga total per STO = list pelanggan STO tsb).
+# Alokasi pelanggan per ODC PROPORSIONAL terhadap okupansi (port used /
+# kap. aktual): okupansi besar -> porsi pelanggan besar. Total per STO
+# tetap = list pelanggan STO (komulatif rounding: share dibulatkan
+# berjalan, ODC terakhir menampung sisa).
 for code in sorted(per_sto):
     target = pelanggan_total.get(code, 0)
     idxs = [i for i, o in enumerate(odc_rows) if o['sto'] == code]
@@ -180,22 +182,36 @@ for code in sorted(per_sto):
         for i in idxs:
             odc_pelanggan[i] = 0
         continue
-    # urut okupansi (used/kap_akt) menurun; data tanpa kap/used di akhir
+    # bobot = port used (okupansi aktual); ODC tanpa data -> bobot 0
+    weights = {}
+    total_w = 0.0
+    for i in idxs:
+        o = odc_rows[i]
+        w = float(o['used'] or 0)
+        weights[i] = w
+        total_w += w
+    if total_w <= 0:
+        # tidak ada data okupansi sama sekali -> fallback rata
+        for n, i in enumerate(idxs):
+            odc_pelanggan[i] = target // len(idxs) + (1 if n < target % len(idxs) else 0)
+        continue
+    # urut okupansi menurun (konsisten dgn tampilan "paling banyak dulu")
     def occ_rank(i):
         o = odc_rows[i]
         if o['kap_akt'] and o['used'] is not None:
             return (-(o['used'] / o['kap_akt']), 0)
         return (0, 1)
     idxs.sort(key=occ_rank)
-    sisa = target
-    for n, i in enumerate(idxs):
-        last = (n == len(idxs) - 1)
-        if last:
-            odc_pelanggan[i] = sisa
-        else:
-            share = round(target / len(idxs))
-            odc_pelanggan[i] = min(share, sisa)
-            sisa -= odc_pelanggan[i]
+    # alokasi proporsional dgn largest-remainder: pastikan total pas
+    exact = {i: target * weights[i] / total_w for i in idxs}
+    alloc = {i: int(exact[i] // 1) for i in idxs}   # floor dulu
+    sisa = target - sum(alloc.values())
+    # bagi sisa ke pecahan terbesar (largest remainder)
+    order = sorted(idxs, key=lambda i: -(exact[i] - alloc[i]))
+    for i in order[:sisa]:
+        alloc[i] += 1
+    for i in idxs:
+        odc_pelanggan[i] = alloc[i]
 
 
 data = {

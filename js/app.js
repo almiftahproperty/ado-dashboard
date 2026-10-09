@@ -243,7 +243,7 @@
       '<td>' + fmt(oSum.akt) + '</td><td>' + fmt(oSum.used) + '</td><td>' + fmt(oSum.idle) + '</td>' +
       '<td>' + pct(oSum.akt ? Math.round(oSum.used / oSum.akt * 1000) / 10 : null) + '</td><td></td>' +
       '<td class="pel-cell">' + fmt(oSum.pelanggan) + '</td></tr></tfoot></table></div>' +
-      '<p class="hint">Klik baris ODC/feeder untuk highlight lokasinya di peta. List Pelanggan = alokasi kumulatif dari data list pelanggan STO ' + code + ' (' + fmt(s.pelanggan) + '), dibagi merata per ODC sesuai urutan okupansi — angka estimasi, bukan data pelanggan per ODC aktual.</p></div>');
+      '<p class="hint">Klik baris ODC/feeder untuk highlight lokasinya di peta. List Pelanggan = alokasi proporsional dari data list pelanggan STO ' + code + ' (' + fmt(s.pelanggan) + ') mengikuti okupansi tiap ODC (makin tinggi okupansi, makin besar porsi) — angka estimasi, bukan data pelanggan per ODC aktual.</p></div>');
 
     /* events: search & sort & row-highlight */
     body.querySelector('#feSearch').addEventListener('input', function (e) {
