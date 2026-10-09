@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADO — Analisa Daerah Operasi · Branch Bekasi</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">ADO</div>
+      <div>
+        <h1>Analisa Daerah Operasi <span class="sep">·</span> Branch Bekasi</h1>
+        <p class="sub">Bidang Bisnis TelkomAkses — jumlah STO, feeder, ODC &amp; kapasitasnya</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span class="badge badge-data">Sumber: ALPOR · <span id="dataDate"></span></span>
+      <span class="badge badge-gen">Diperbarui: <span id="genDate"></span></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="note" id="mapNote"></div>
+
+  <section class="grid-2">
+    <div class="card">
+      <div class="card-head">
+        <h2>Peta Daerah Operasi</h2>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div id="map"><div class="map-fallback" id="mapFallback"></div></div>
+      <p class="hint">Klik area/pin untuk detail. Layer <b>Feeder</b> bisa dinyalakan lewat kontrol layer (kanan atas peta) — berat, default mati.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Ringkas per STO</h2></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Tabel Detail per STO</h2><span class="hint-inline">Okupansi FE = used / kapasitas core · Okupansi ODC = port used / kapasitas aktual · klik baris STO untuk lihat inventory detail</span></div>
+    <div class="tbl-wrap">
+      <table id="stoTable">
+        <thead>
+          <tr>
+            <th rowspan="2">STO</th><th rowspan="2">Area</th>
+            <th colspan="5">Feeder</th>
+            <th colspan="5">ODC</th>
+          </tr>
+          <tr>
+            <th>Jml</th><th>Kap (core)</th><th>Used</th><th>Idle</th><th>Okupansi</th>
+            <th>Jml</th><th>Kap (port)</th><th>Used</th><th>Idle</th><th>Okupansi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" id="detailCard">
+    <div class="card-head">
+      <h2>Detail Inventory per STO <span class="detail-label" id="detailStoLabel"></span></h2>
+      <select id="stoSelect" class="sto-select"></select>
+    </div>
+    <div id="detailBody"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Catatan Kualitas Data (audit)</h2></div>
+    <div class="anoms" id="anoms"></div>
+    <p class="hint" id="anomNote"></p>
+  </section>
+
+  <footer>
+    Dihasilkan otomatis dari 4 file KML ALPOR (FEEDER &amp; ODC · Bekasi Kota + Bekasi Depok) ·
+    Dashboard statis — tanpa backend · <span id="footGen"></span>
+  </footer>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
