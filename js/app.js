@@ -27,6 +27,8 @@
       '<div class="k-num">' + k.num + '</div><div class="k-sub">' + k.sub + '</div></div>';
   }).join('');
 
+  var WARN_ICON = '<svg class="ic-warn" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.5 15 14H1L8 1.5zm-.75 4.5v4h1.5v-4h-1.5zM8 11.4a.85.85 0 1 0 0 1.7.85.85 0 0 0 0-1.7z"/></svg>';
+
   /* ---------- anomali ---------- */
   var anoms = [
     {n: AN.fe_kosong, l: 'kabel feeder tanpa FTM (folder KOSONG) — mayoritas tanpa data kapasitas'},
@@ -53,7 +55,7 @@
     var area = s.area === 'BEKASI KOTA' ? 'Kota' : 'Depok';
     var feOcc = s.fe_occ === null ? 0 : s.fe_occ;
     var odcOcc = s.odc_occ === null ? 0 : s.odc_occ;
-    var flag = s.fe_kosong > 0 ? '<div class="c-flag">⚠ ' + s.fe_kosong + ' kabel tanpa FTM/kapasitas</div>' : '';
+    var flag = s.fe_kosong > 0 ? '<div class="c-flag">' + WARN_ICON + ' ' + s.fe_kosong + ' kabel tanpa FTM/kapasitas</div>' : '';
     return '<div class="chip" data-sto="' + s.code + '">' +
       '<div class="c-head"><span class="dot" style="background:' + s.color + '"></span>' +
       '<span class="c-code">' + s.code + '</span><span class="c-area" style="background:' + s.color + '">' + area + '</span></div>' +
@@ -349,7 +351,7 @@
       'Kapasitas: <b>' + fmt(kap) + '</b> port · Used: <b>' + fmt(used) + '</b><br>' +
       (occ === null ? '<span class="pp-flag">data kotor / tidak lengkap</span>'
                     : 'Okupansi: <b>' + occ.toFixed(1) + '%</b>') +
-      ((flags & 2) ? '<br><span class="pp-flag">⚠ Kap_Aktual &gt; Kap_Potensial</span>' : '');
+      ((flags & 2) ? '<br><span class="pp-flag">' + WARN_ICON + ' Kap_Aktual &gt; Kap_Potensial</span>' : '');
     gOdc.addLayer(L.circleMarker([lat, lon], {
       radius: 4, color: col, weight: 1, fillColor: col, fillOpacity: 0.75
     }).bindPopup(html));
@@ -362,8 +364,8 @@
     var html = '<div class="pp-title" style="color:' + col + '">' + name + '</div>' +
       'STO ' + sto + ' · ' + (spec || '—') + '<br>' +
       'Kapasitas: <b>' + fmt(cap) + '</b> core · Used: <b>' + fmt(used) + '</b> · Idle: <b>' + fmt(idle) + '</b> · Spare: <b>' + fmt(spare) + '</b>' +
-      ((flags & 1) ? '<br><span class="pp-flag">⚠ tanpa FTM — data perlu update</span>' : '') +
-      ((flags & 2) ? '<br><span class="pp-flag">⚠ Used+Idle+Spare ≠ Capacity</span>' : '');
+      ((flags & 1) ? '<br><span class="pp-flag">' + WARN_ICON + ' tanpa FTM — data perlu update</span>' : '') +
+      ((flags & 2) ? '<br><span class="pp-flag">' + WARN_ICON + ' Used+Idle+Spare ≠ Capacity</span>' : '');
     var line = L.polyline(segs, {color: col, weight: 1.5, opacity: 0.7}).bindPopup(html);
     gFe.addLayer(line);
     DEBUG.feederLines++;

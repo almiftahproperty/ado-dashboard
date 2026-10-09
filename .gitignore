@@ -1,2 +1,5 @@
 scripts/
 .vercel/
+
+.vercel
+.env*
