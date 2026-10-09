@@ -85,12 +85,14 @@
       '<td>' + area + '</td>' +
       cell(s.n_feeder) + cell(s.fe_cap) + cell(s.fe_used) + cell(s.fe_idle) + occTd(s.fe_occ) +
       cell(s.n_odc) + cell(s.odc_kap_akt) + cell(s.odc_used) + cell(s.odc_idle) + occTdOdc(s.odc_occ) +
+      '<td class="pel-cell">' + fmt(s.pelanggan) + '</td>' +
       '</tr>';
   }).join('');
   document.querySelector('#stoTable tfoot').innerHTML =
     '<tr><td>TOTAL</td><td>10 STO</td>' +
     '<td>' + fmt(T.n_feeder) + '</td><td>' + fmt(T.fe_cap) + '</td><td>' + fmt(T.fe_used) + '</td><td>' + fmt(T.fe_idle) + '</td><td>' + pct(T.fe_occ) + '</td>' +
-    '<td>' + fmt(T.n_odc) + '</td><td>' + fmt(T.odc_kap_akt) + '</td><td>' + fmt(T.odc_used) + '</td><td>' + fmt(T.odc_idle) + '</td><td>' + pct(T.odc_occ) + '</td></tr>';
+    '<td>' + fmt(T.n_odc) + '</td><td>' + fmt(T.odc_kap_akt) + '</td><td>' + fmt(T.odc_used) + '</td><td>' + fmt(T.odc_idle) + '</td><td>' + pct(T.odc_occ) + '</td>' +
+    '<td class="pel-cell">' + fmt(T.pelanggan) + '</td></tr>';
 
   /* ---------- peta ---------- */
   var byCode = {};
@@ -113,7 +115,7 @@
 
   /* ---------- DRILL-DOWN DETAIL INVENTORY PER STO ---------- */
   var FE_KEYS = ['sto', 'name', 'spec', 'cap', 'used', 'idle', 'spare', 'flags', 'segs', 'ftm'];
-  var ODC_KEYS = ['sto', 'name', 'spec', 'kap_akt', 'used', 'lat', 'lon', 'flags', 'kap_pot'];
+  var ODC_KEYS = ['sto', 'name', 'spec', 'kap_akt', 'used', 'lat', 'lon', 'flags', 'kap_pot', 'pelanggan'];
   var feObjects = ADO.feeders.map(function (r) {
     var o = {};
     FE_KEYS.forEach(function (k, i) { o[k] = r[i]; });
@@ -206,10 +208,11 @@
 
     /* ---- blok ODC ---- */
     var odcRows = getFiltered(odcObjects, code, state.odc.q, state.odc.sort, state.odc.dir);
-    var oSum = {akt: 0, used: 0, idle: 0};
+    var oSum = {akt: 0, used: 0, idle: 0, pelanggan: 0};
     odcRows.forEach(function (o) {
       oSum.akt += o.kap_akt || 0; oSum.used += o.used || 0;
       oSum.idle += (o.kap_akt || 0) - (o.used || 0);
+      oSum.pelanggan += o.pelanggan || 0;
     });
     body.insertAdjacentHTML('beforeend',
       '<div class="d-block">' +
@@ -222,7 +225,8 @@
       '<th class="sortable" data-k="kap_pot" data-t="odc">Kap. Potensial ⇅</th>' +
       '<th class="sortable" data-k="kap_akt" data-t="odc">Kap. Aktual ⇅</th>' +
       '<th class="sortable" data-k="used" data-t="odc">Port Used ⇅</th>' +
-      '<th>Port Idle</th><th>Okupansi</th><th>Status</th></tr></thead><tbody>' +
+      '<th>Port Idle</th><th>Okupansi</th><th>Status</th>' +
+      '<th class="sortable" data-k="pelanggan" data-t="odc">List Pelanggan ⇅</th></tr></thead><tbody>' +
       odcRows.map(function (o) {
         var occ = occCalc(o.used, o.kap_akt);
         var w = occ === null ? 0 : Math.min(occ, 100);
@@ -232,12 +236,14 @@
           '<td>' + fmt(o.kap_pot) + '</td><td>' + fmt(o.kap_akt) + '</td><td>' + fmt(o.used) + '</td>' +
           '<td>' + fmt((o.kap_akt || 0) - (o.used || 0)) + '</td>' +
           '<td><div class="tbar"><div class="bar bar-odc"><i style="width:' + w + '%"></i></div><span>' + pct(occ === null ? null : Math.round(occ * 10) / 10) + '</span></div></td>' +
-          '<td>' + statusFlags(o.flags, o.flags & 2) + '</td></tr>';
+          '<td>' + statusFlags(o.flags, o.flags & 2) + '</td>' +
+          '<td class="pel-cell">' + fmt(o.pelanggan) + '</td></tr>';
       }).join('') +
       '</tbody><tfoot><tr><td>TOTAL (' + odcRows.length + ')</td><td></td><td></td>' +
       '<td>' + fmt(oSum.akt) + '</td><td>' + fmt(oSum.used) + '</td><td>' + fmt(oSum.idle) + '</td>' +
-      '<td>' + pct(oSum.akt ? Math.round(oSum.used / oSum.akt * 1000) / 10 : null) + '</td><td></td></tr></tfoot></table></div>' +
-      '<p class="hint">Klik baris ODC/feeder untuk highlight lokasinya di peta.</p></div>');
+      '<td>' + pct(oSum.akt ? Math.round(oSum.used / oSum.akt * 1000) / 10 : null) + '</td><td></td>' +
+      '<td class="pel-cell">' + fmt(oSum.pelanggan) + '</td></tr></tfoot></table></div>' +
+      '<p class="hint">Klik baris ODC/feeder untuk highlight lokasinya di peta. List Pelanggan = alokasi kumulatif dari data list pelanggan STO ' + code + ' (' + fmt(s.pelanggan) + '), dibagi merata per ODC sesuai urutan okupansi — angka estimasi, bukan data pelanggan per ODC aktual.</p></div>');
 
     /* events: search & sort & row-highlight */
     body.querySelector('#feSearch').addEventListener('input', function (e) {

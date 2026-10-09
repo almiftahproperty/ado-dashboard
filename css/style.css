@@ -204,6 +204,7 @@ th.sortable:hover{color:var(--primary)}
 th.sortable::after{content:" \2195";font-size:9px;opacity:.55}
 .name-cell{font-weight:600;font-family:"Fira Code",ui-monospace,monospace;font-size:11.5px;letter-spacing:-.2px}
 td.dim{color:var(--muted-fg)}
+.pel-cell{font-family:"Fira Code",ui-monospace,monospace;font-weight:600;color:var(--primary)}
 .st{font-size:10.5px;white-space:nowrap;font-weight:500}
 .st.ok{color:var(--ok)}
 .st.warn{color:var(--warn)}

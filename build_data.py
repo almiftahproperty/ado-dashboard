@@ -128,12 +128,29 @@ per_sto = S['per_sto']
 branch = S['branch']
 an = S['anomalies']
 
+# ---------- list pelanggan (alokasi kumulatif per ODC, urut okupansi desc) ----------
+import openpyxl
+XLSX_PELANGGAN = os.path.join(AUDIT, 'list_pelanggan.xlsx')
+pelanggan_total = {}   # sto -> jumlah pelanggan
+if os.path.exists(XLSX_PELANGGAN):
+    wb = openpyxl.load_workbook(XLSX_PELANGGAN, read_only=True, data_only=True)
+    ws = wb[wb.sheetnames[0]]
+    for i, row in enumerate(ws.iter_rows(values_only=True)):
+        if i == 0 or not row or not row[0]:
+            continue
+        sto = str(row[0]).strip()
+        if sto in per_sto and isinstance(row[1], (int, float)):
+            pelanggan_total[sto] = int(row[1])
+    wb.close()
+
+
 fe_cap = sum(x['cap'] or 0 for x in fe_rows)
 fe_used = sum(x['used'] or 0 for x in fe_rows)
 odc_akt = sum(x['kap_akt'] or 0 for x in odc_rows)
 odc_used = sum(x['used'] or 0 for x in odc_rows)
 
 sto_list = []
+odc_pelanggan = {}  # index record ODC di list -> pelanggan dialokasikan
 for code in sorted(per_sto):
     v = per_sto[code]
     pts = [(o['lon'], o['lat']) for o in odc_rows if o['sto'] == code]
@@ -151,7 +168,35 @@ for code in sorted(per_sto):
         'odc_kap_akt': v['odc_kap_akt'], 'odc_used': v['odc_used'],
         'odc_idle': v['odc_idle'], 'odc_occ': odc_occ,
         'fe_kosong': v['fe_kosong'],
+        'pelanggan': pelanggan_total.get(code, 0),
     })
+
+# Alokasi kumulatif pelanggan per ODC (kumulatif berjalan; ODC terakhir
+# menampung sisa sehingga total per STO = list pelanggan STO tsb).
+for code in sorted(per_sto):
+    target = pelanggan_total.get(code, 0)
+    idxs = [i for i, o in enumerate(odc_rows) if o['sto'] == code]
+    if not idxs or target <= 0:
+        for i in idxs:
+            odc_pelanggan[i] = 0
+        continue
+    # urut okupansi (used/kap_akt) menurun; data tanpa kap/used di akhir
+    def occ_rank(i):
+        o = odc_rows[i]
+        if o['kap_akt'] and o['used'] is not None:
+            return (-(o['used'] / o['kap_akt']), 0)
+        return (0, 1)
+    idxs.sort(key=occ_rank)
+    sisa = target
+    for n, i in enumerate(idxs):
+        last = (n == len(idxs) - 1)
+        if last:
+            odc_pelanggan[i] = sisa
+        else:
+            share = round(target / len(idxs))
+            odc_pelanggan[i] = min(share, sisa)
+            sisa -= odc_pelanggan[i]
+
 
 data = {
     'meta': {
@@ -173,6 +218,7 @@ data = {
         'odc_kap_pot': branch['odc_kap_pot'], 'odc_kap_akt': odc_akt,
         'odc_used': odc_used, 'odc_idle': branch['odc_idle'],
         'odc_occ': round(odc_used / odc_akt * 100, 1),
+        'pelanggan': sum(pelanggan_total.values()),
     },
     'anomalies': {
         'fe_kosong': an['fe_cables_kosong']['BEKASI KOTA'] + an['fe_cables_kosong']['BEKASI DEPOK'],
@@ -183,9 +229,10 @@ data = {
         'odc_dup': len(an['odc_dup_names_in_file']['BEKASI DEPOK']),
     },
     'sto': sto_list,
-    # odc: [sto, name, spec, kap_akt, used, lat, lon, flags, kap_pot]
+    # odc: [sto, name, spec, kap_akt, used, lat, lon, flags, kap_pot, pelanggan]
     'odc': [[o['sto'], o['name'], o['spec'], o['kap_akt'], o['used'],
-             o['lat'], o['lon'], o['flags'], o['kap_pot']] for o in odc_rows],
+             o['lat'], o['lon'], o['flags'], o['kap_pot'],
+             odc_pelanggan.get(i, 0)] for i, o in enumerate(odc_rows)],
     # feeders: [sto, name, spec, cap, used, idle, spare, flags, segs, ftm]
     'feeders': [[f['sto'], f['name'], f['spec'], f['cap'], f['used'],
                  f['idle'], f['spare'], f['flags'], f['segs'], f['ftm']] for f in fe_rows],
@@ -200,4 +247,5 @@ print('data.js ditulis:', OUT)
 print('sto:', len(sto_list), '| odc:', len(odc_rows), '| feeders:', len(fe_rows),
       '| cables dgn segmen peta:', sum(1 for f in fe_rows if f['segs']))
 for s in sto_list:
-    print(f"  {s['code']:4} polygon: {len(s['polygon']):3} titik | FE {s['n_feeder']:3} | ODC {s['n_odc']:3} | okFE {s['fe_occ']}% | okODC {s['odc_occ']}%")
+    print(f"  {s['code']:4} polygon: {len(s['polygon']):3} titik | FE {s['n_feeder']:3} | ODC {s['n_odc']:3} | okFE {s['fe_occ']}% | okODC {s['odc_occ']}% | pelanggan {s['pelanggan']:6}")
+print('total pelanggan:', sum(pelanggan_total.values()))
