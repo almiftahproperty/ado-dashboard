@@ -31,19 +31,23 @@ body{
 /* fokus keyboard — selalu terlihat */
 :focus-visible{outline:2px solid var(--ring);outline-offset:2px;border-radius:6px}
 
-/* ---------- header (light) ---------- */
+/* ---------- header (gaya TelkomAkses) ---------- */
 .topbar-accent{height:3px;background:linear-gradient(90deg,var(--primary),#C0392B 55%,var(--accent))}
 .top{
-  background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.80) 0%,rgba(255,255,255,.35) 38%,rgba(255,255,255,0) 68%),
+    url("../assets/bg-ta.png") right center/cover no-repeat,
+    #FAF7F5;
+  backdrop-filter:blur(8px);
   border-bottom:1px solid var(--border);
   padding:16px 0 14px;position:sticky;top:0;z-index:1050;
 }
 .top .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:14px}
-.logo{
-  background:linear-gradient(135deg,var(--primary),#C0392B);color:#fff;
-  font-weight:700;font-size:19px;letter-spacing:1.5px;padding:11px 14px;border-radius:12px;
-  box-shadow:var(--shadow-1);
+.logo-ta{
+  height:58px;width:auto;object-fit:contain;flex:none;
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:5px 9px;box-shadow:var(--shadow-1);
 }
 .brand h1{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
 .brand .sep{color:var(--border-strong);font-weight:300}
@@ -212,6 +216,7 @@ td.dim{color:var(--muted-fg)}
   .kpi .k-num{font-size:23px}
   #map{height:420px}
   .brand h1{font-size:16px}
+  .logo-ta{height:44px}
   .meta{align-items:flex-start}
 }
 
