@@ -8,9 +8,10 @@ AUDIT = os.path.join(BASE, 'audit').replace('\\', '/')
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'js', 'data.js')
 
 STO_COLORS = {
-    'BEK': '#e6194b', 'CNE': '#3cb44b', 'CSL': '#b8860b', 'DEP': '#4363d8',
-    'KLB': '#f58231', 'KRA': '#911eb4', 'PCM': '#0a9396', 'PDE': '#f032e6',
-    'PKY': '#5c940d', 'SKJ': '#d6336c',
+    # Palet TelkomAkses (muted, tidak terlalu terang) — semua pasangan terbedakan jelas
+    'BEK': '#C0392B', 'CNE': '#1E8449', 'CSL': '#B7950B', 'DEP': '#2874A6',
+    'KLB': '#CA6F1E', 'KRA': '#6C3483', 'PCM': '#148F77', 'PDE': '#9B59B6',
+    'PKY': '#4D7C0F', 'SKJ': '#AD1457',
 }
 
 def num(x):
